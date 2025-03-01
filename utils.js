@@ -107,7 +107,7 @@ async function sendToSlack({
 // 分析結果からSlackメッセージを生成
 function createAnalysisMessage(analysis, rankCount, date) {
   let message = ""
-  message += `【GMO順位チェッカー順位による計測結果】（${date})\n`
+  message += `GMO順位チェッカー順位計測結果（${date})\n`
   message += `対象グループ：DM_SとAランクキーワード\n\n`
   message += `1~3位  ：${analysis['1-3'].toFixed(2)}% (${rankCount['1-3']}件)\n`
   message += `4~10位 ：${analysis['4-10'].toFixed(2)}% (${rankCount['4-10']}件)\n`
