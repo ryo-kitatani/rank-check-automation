@@ -59,7 +59,7 @@ async function main() {
     // 分析結果をSlackに通知
     if (config.slackWebhook) {
       await sendToSlack({
-        message: createAnalysisMessage(result.rankPercent, result.rankCounts, config.date),
+        message: createAnalysisMessage(result, config.date),
         webhookUrl: config.slackWebhook,
         channel: "#coeteco-dm-product"
       });

@@ -53,16 +53,29 @@ function parseRankingCsv(filePath) {
     // G順位の列名を特定
     const columnNames = Object.keys(records[0]);
     let gRankingColumn = findGRankingColumn(records, columnNames);
+    let gChangeColumn = findGChangeColumn(records, columnNames);
+    let keywordColumn = findKeywordColumn(records, columnNames);
 
     if (gRankingColumn) {
       console.log(`G順位の列を特定しました: ${gRankingColumn}`);
+      console.log(`G前日比の列を特定しました: ${gChangeColumn || 'なし'}`);
+      console.log(`キーワードの列を特定しました: ${keywordColumn}`);
 
       // データ変換
-      const keywords = findKeywordColumn(records, columnNames);
-      const rankData = records.map(record => ({
-        keyword: record[keywords] || '',
-        gRanking: parseInt(record[gRankingColumn], 10)
-      })).filter(item => item.keyword && !isNaN(item.gRanking));
+      const rankData = records.map(record => {
+        const item = {
+          keyword: record[keywordColumn] || '',
+          gRanking: parseInt(record[gRankingColumn], 10)
+        };
+
+        // 前日比データがある場合は追加
+        if (gChangeColumn) {
+          const change = record[gChangeColumn];
+          item.gChange = !isNaN(parseInt(change, 10)) ? parseInt(change, 10) : null;
+        }
+
+        return item;
+      }).filter(item => item.keyword && !isNaN(item.gRanking));
 
       console.log(`変換後のデータ: ${rankData.length}件`);
       return rankData;
@@ -122,6 +135,35 @@ function findGRankingColumn(records, columnNames) {
 
   return null;
 }
+
+// G前日比の列を特定する
+function findGChangeColumn(records, columnNames) {
+  // 可能性のある列名
+  const possibleColumnNames = [
+    'G前日比', 'G_前日比', 'Google前日比', 'Google_前日比',
+    'g_change', 'google_change', 'change', '変化', '前日比',
+    '順位変化', 'rank_change', 'gChange'
+  ];
+
+  // まず、既知の列名パターンをチェック
+  for (const col of possibleColumnNames) {
+    if (columnNames.includes(col)) {
+      return col;
+    }
+  }
+
+  // 部分一致で列名をチェック
+  for (const col of columnNames) {
+    if (col.toLowerCase().includes('前日比') ||
+      col.toLowerCase().includes('変化') ||
+      col.toLowerCase().includes('change')) {
+      return col;
+    }
+  }
+
+  return null; // 見つからない場合はnullを返す
+}
+
 
 // キーワード列を特定する
 function findKeywordColumn(records, columnNames) {
