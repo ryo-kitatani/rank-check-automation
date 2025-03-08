@@ -5,7 +5,15 @@ const config = {
   email: process.env.RANK_CHECKER_EMAIL,
   password: process.env.RANK_CHECKER_PASSWORD,
   slackWebhook: process.env.SLACK_WEBHOOK_URL,
-  date: process.env.ANALYSIS_DATE || new Date().toISOString().split('T')[0] // 今日の日付（YYYY-MM-DD形式）
+  // 今日の日付（YYYY-MM-DD形式）
+  date: new Date().toISOString().split('T')[0],
+  // Google Sheets APIの設定を追加
+  googleSheets: {
+    enabled: process.env.ENABLE_GOOGLE_SHEETS === 'true',
+    spreadsheetId: process.env.SPREADSHEET_ID,
+    // サービスアカウントのキーファイルパス
+    keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+  }
 };
 
 // 設定の検証

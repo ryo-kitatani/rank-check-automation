@@ -49,6 +49,21 @@ async function main() {
     if (downloadFileName) {
       const csvFilePath = path.join(downloadPath, downloadFileName);
       rankData = csvParser.parseRankingCsv(csvFilePath);
+
+      // ここからGoogleスプレッドシートへの書き込み処理を追加
+      if (config.googleSheets && config.googleSheets.enabled) {
+        try {
+          console.log('Googleスプレッドシートにデータを書き込みます...');
+          await writeToGoogleSheets(
+            rankData,
+            config.googleSheets.spreadsheetId || '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
+            config.date
+          );
+          console.log('Googleスプレッドシートへの書き込みが完了しました');
+        } catch (sheetsError) {
+          console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', sheetsError);
+          // スプレッドシートのエラーがあっても処理を続行
+        }
     } else {
       console.error('CSVファイルが見つかりませんでした');
     }
