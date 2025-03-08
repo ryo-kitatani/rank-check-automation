@@ -13,6 +13,7 @@
     "axios": "^1.8.1",
     "csv-parse": "^5.6.0",
     "dotenv": "^16.4.7",
+    "googleapis": "^146.0.0",
     "puppeteer": "^24.3.0"
   }
 }

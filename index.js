@@ -3,6 +3,7 @@ const { config, validateConfig, logConfig } = require('./config');
 const browser = require('./browser');
 const csvParser = require('./csvParser');
 const { analyzeRankData, sendToSlack, createAnalysisMessage, delay } = require('./utils');
+const {writeToGoogleSheets} = require("./googleSheets");
 
 // ダウンロードディレクトリのパス
 const downloadPath = path.join(__dirname, 'downloads');
@@ -56,7 +57,7 @@ async function main() {
           console.log('Googleスプレッドシートにデータを書き込みます...');
           await writeToGoogleSheets(
             rankData,
-            config.googleSheets.spreadsheetId || '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
+            config.googleSheets.spreadsheetId,
             config.date
           );
           console.log('Googleスプレッドシートへの書き込みが完了しました');
@@ -64,6 +65,7 @@ async function main() {
           console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', sheetsError);
           // スプレッドシートのエラーがあっても処理を続行
         }
+      }
     } else {
       console.error('CSVファイルが見つかりませんでした');
     }
@@ -72,13 +74,13 @@ async function main() {
     const result = analyzeRankData(rankData);
 
     // 分析結果をSlackに通知
-    if (config.slackWebhook) {
-      await sendToSlack({
-        message: createAnalysisMessage(result, config.date),
-        webhookUrl: config.slackWebhook,
-        channel: "#coeteco-dm-product"
-      });
-    }
+    // if (config.slackWebhook) {
+    //   await sendToSlack({
+    //     message: createAnalysisMessage(result, config.date),
+    //     webhookUrl: config.slackWebhook,
+    //     channel: "#coeteco-dm-product"
+    //   });
+    // }
 
     console.log('処理が完了しました');
     return { success: true, result };
@@ -86,17 +88,17 @@ async function main() {
     console.error('エラーが発生しました:', error.message);
 
     // エラーをSlackに通知
-    if (config.slackWebhook) {
-      try {
-        await sendToSlack({
-          message: `エラーが発生しました: ${error.message}`,
-          webhookUrl: config.slackWebhook,
-          channel: "#coeteco-dm-product"
-        });
-      } catch (slackError) {
-        console.error('Slack通知エラー:', slackError.message);
-      }
-    }
+    // if (config.slackWebhook) {
+    //   try {
+    //     await sendToSlack({
+    //       message: `エラーが発生しました: ${error.message}`,
+    //       webhookUrl: config.slackWebhook,
+    //       channel: "#coeteco-dm-product"
+    //     });
+    //   } catch (slackError) {
+    //     console.error('Slack通知エラー:', slackError.message);
+    //   }
+    // }
 
     return { success: false, error: error.message };
   } finally {
