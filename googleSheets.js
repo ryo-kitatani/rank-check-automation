@@ -1,5 +1,5 @@
-const { google } = require('googleapis');
-const { config } = require('./config');
+const {google} = require('googleapis');
+const {config} = require('./config');
 
 /**
  * Googleスプレッドシートにランキングデータを書き込む
@@ -16,7 +16,7 @@ async function writeToGoogleSheets(rankData, spreadsheetId, date) {
     });
 
     const client = await auth.getClient();
-    const sheets = google.sheets({ version: 'v4', auth: client });
+    const sheets = google.sheets({version: 'v4', auth: client});
 
     console.log(`スプレッドシート(ID: ${spreadsheetId})からデータを取得中...`);
 
@@ -65,109 +65,115 @@ async function writeToGoogleSheets(rankData, spreadsheetId, date) {
 
     // 既にB列にデータがあるかどうかをチェック
     const hasBColumn = values.length > 0 && values[0].length > 1;
+    const hasTodayColumn = values.length > 0 && values[0][1] === date;
 
     console.log(`B列データの存在: ${hasBColumn ? 'あり' : 'なし'}`);
 
-    // 新しい列を挿入する（既にB列にデータがある場合はB列の左に、なければB列に）
-    if (hasBColumn) {
-      console.log('既存データの左側に新しい列を挿入します...');
+    if (hasTodayColumn) {
+      console.log('今日の日付のデータが既に存在します');
+      return false;
+    } else {
+      // 新しい列を挿入する（既にB列にデータがある場合はB列の左に、なければB列に）
+      if (hasBColumn) {
+        console.log('既存データの左側に新しい列を挿入します...');
 
-      // B列の左側（インデックス1）に新しい列を挿入
-      await sheets.spreadsheets.batchUpdate({
-        spreadsheetId,
-        resource: {
-          requests: [
-            {
-              insertDimension: {
-                range: {
-                  sheetId: sheetId,
-                  dimension: 'COLUMNS',
-                  startIndex: 1, // B列の位置（0-indexed）
-                  endIndex: 2, // 1列挿入
+        // B列の左側（インデックス1）に新しい列を挿入
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          resource: {
+            requests: [
+              {
+                insertDimension: {
+                  range: {
+                    sheetId: sheetId,
+                    dimension: 'COLUMNS',
+                    startIndex: 1, // B列の位置（0-indexed）
+                    endIndex: 2, // 1列挿入
+                  },
+                  inheritFromBefore: false,
                 },
-                inheritFromBefore: false,
               },
-            },
-          ],
-        },
-      });
-    }
-
-    console.log('日付を設定します...');
-
-    // B1に日付を設定
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: 'GMO順位チェッカー!B1',
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [[date]]
-      }
-    });
-
-    // キーワードとその行番号をマッピング
-    const keywordRows = {};
-
-    // A列からキーワードを抽出（ヘッダー行はスキップ）
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] && values[i][0]) {
-        keywordRows[values[i][0]] = i + 1; // 1-indexedの行番号
-      }
-    }
-
-    console.log(`${rankData.length}件のキーワードデータを更新します...`);
-
-    // バッチ更新のためのデータ準備
-    const valueRanges = [];
-    const newKeywords = [];
-
-    // 各キーワードの順位データを準備
-    for (const item of rankData) {
-      const { keyword, gRanking } = item;
-
-      // キーワードがスプレッドシートにあるか確認
-      let rowIndex = keywordRows[keyword];
-
-      if (rowIndex) {
-        // 既存キーワードの更新（B列に順位を設定）
-        valueRanges.push({
-          range: `GMO順位チェッカー!B${rowIndex}`,
-          values: [[gRanking]]
+            ],
+          },
         });
-      } else {
-        // 新しいキーワードをリストに追加
-        newKeywords.push([keyword, gRanking]);
       }
-    }
 
-    // 既存データのバッチ更新
-    if (valueRanges.length > 0) {
-      await sheets.spreadsheets.values.batchUpdate({
-        spreadsheetId,
-        resource: {
-          valueInputOption: 'USER_ENTERED',
-          data: valueRanges
-        }
-      });
-      console.log(`${valueRanges.length}件の既存キーワードを更新しました`);
-    }
+      console.log('日付を設定します...');
 
-    // 新しいキーワードの追加
-    if (newKeywords.length > 0) {
-      await sheets.spreadsheets.values.append({
+      // B1に日付を設定
+      await sheets.spreadsheets.values.update({
         spreadsheetId,
-        range: 'GMO順位チェッカー!A:B',
+        range: 'GMO順位チェッカー!B1',
         valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
         resource: {
-          values: newKeywords
+          values: [[date]]
         }
       });
-      console.log(`${newKeywords.length}件の新しいキーワードを追加しました`);
-    }
 
-    console.log('Googleスプレッドシートにデータを書き込みました');
-    return true;
+      // キーワードとその行番号をマッピング
+      const keywordRows = {};
+
+      // A列からキーワードを抽出（ヘッダー行はスキップ）
+      for (let i = 1; i < values.length; i++) {
+        if (values[i] && values[i][0]) {
+          keywordRows[values[i][0]] = i + 1; // 1-indexedの行番号
+        }
+      }
+
+      console.log(`${rankData.length}件のキーワードデータを更新します...`);
+
+      // バッチ更新のためのデータ準備
+      const valueRanges = [];
+      const newKeywords = [];
+
+      // 各キーワードの順位データを準備
+      for (const item of rankData) {
+        const {keyword, gRanking} = item;
+
+        // キーワードがスプレッドシートにあるか確認
+        let rowIndex = keywordRows[keyword];
+
+        if (rowIndex) {
+          // 既存キーワードの更新（B列に順位を設定）
+          valueRanges.push({
+            range: `GMO順位チェッカー!B${rowIndex}`,
+            values: [[gRanking]]
+          });
+        } else {
+          // 新しいキーワードをリストに追加
+          newKeywords.push([keyword, gRanking]);
+        }
+      }
+
+      // 既存データのバッチ更新
+      if (valueRanges.length > 0) {
+        await sheets.spreadsheets.values.batchUpdate({
+          spreadsheetId,
+          resource: {
+            valueInputOption: 'USER_ENTERED',
+            data: valueRanges
+          }
+        });
+        console.log(`${valueRanges.length}件の既存キーワードを更新しました`);
+      }
+
+      // 新しいキーワードの追加
+      if (newKeywords.length > 0) {
+        await sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range: 'GMO順位チェッカー!A:B',
+          valueInputOption: 'USER_ENTERED',
+          insertDataOption: 'INSERT_ROWS',
+          resource: {
+            values: newKeywords
+          }
+        });
+        console.log(`${newKeywords.length}件の新しいキーワードを追加しました`);
+      }
+
+      console.log('Googleスプレッドシートにデータを書き込みました');
+      return true;
+    }
   } catch (error) {
     console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', error);
     throw error;
