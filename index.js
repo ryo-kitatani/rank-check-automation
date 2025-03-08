@@ -74,13 +74,13 @@ async function main() {
     const result = analyzeRankData(rankData);
 
     // 分析結果をSlackに通知
-    // if (config.slackWebhook) {
-    //   await sendToSlack({
-    //     message: createAnalysisMessage(result, config.date),
-    //     webhookUrl: config.slackWebhook,
-    //     channel: "#coeteco-dm-product"
-    //   });
-    // }
+    if (config.slackWebhook) {
+      await sendToSlack({
+        message: createAnalysisMessage(result, config.date),
+        webhookUrl: config.slackWebhook,
+        channel: "#coeteco-dm-product"
+      });
+    }
 
     console.log('処理が完了しました');
     return { success: true, result };
@@ -88,17 +88,17 @@ async function main() {
     console.error('エラーが発生しました:', error.message);
 
     // エラーをSlackに通知
-    // if (config.slackWebhook) {
-    //   try {
-    //     await sendToSlack({
-    //       message: `エラーが発生しました: ${error.message}`,
-    //       webhookUrl: config.slackWebhook,
-    //       channel: "#coeteco-dm-product"
-    //     });
-    //   } catch (slackError) {
-    //     console.error('Slack通知エラー:', slackError.message);
-    //   }
-    // }
+    if (config.slackWebhook) {
+      try {
+        await sendToSlack({
+          message: `エラーが発生しました: ${error.message}`,
+          webhookUrl: config.slackWebhook,
+          channel: "#coeteco-dm-product"
+        });
+      } catch (slackError) {
+        console.error('Slack通知エラー:', slackError.message);
+      }
+    }
 
     return { success: false, error: error.message };
   } finally {
