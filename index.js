@@ -1,9 +1,10 @@
 const path = require('path');
-const { config, validateConfig, logConfig } = require('./config');
+const {config, validateConfig, logConfig} = require('./config');
 const browser = require('./browser');
 const csvParser = require('./csvParser');
-const { analyzeRankData, sendToSlack, createAnalysisMessage, delay } = require('./utils');
-const {writeToGoogleSheets} = require("./googleSheets");
+const {analyzeRankData, delay} = require('./utils');
+const {writeToGoogleSheets, writePercentageToGoogleSheets} = require("./googleSheets");
+const {sendToSlack, createAnalysisMessage} = require('./slack');
 
 // ダウンロードディレクトリのパス
 const downloadPath = path.join(__dirname, 'downloads');
@@ -24,7 +25,7 @@ async function main() {
 
   try {
     // ブラウザの初期化
-    const { browser: instance, page } = await browser.initBrowser(config.headless);
+    const {browser: instance, page} = await browser.initBrowser(config.headless);
     browserInstance = instance;
 
     // ダウンロードディレクトリの設定
@@ -50,28 +51,37 @@ async function main() {
     if (downloadFileName) {
       const csvFilePath = path.join(downloadPath, downloadFileName);
       rankData = csvParser.parseRankingCsv(csvFilePath);
-
-      // ここからGoogleスプレッドシートへの書き込み処理を追加
-      if (config.googleSheets && config.googleSheets.enabled) {
-        try {
-          console.log('Googleスプレッドシートにデータを書き込みます...');
-          await writeToGoogleSheets(
-            rankData,
-            config.googleSheets.spreadsheetId,
-            config.date
-          );
-          console.log('Googleスプレッドシートへの書き込みが完了しました');
-        } catch (sheetsError) {
-          console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', sheetsError);
-          // スプレッドシートのエラーがあっても処理を続行
-        }
-      }
     } else {
       console.error('CSVファイルが見つかりませんでした');
     }
 
     // ランキングデータを分析
     const result = analyzeRankData(rankData);
+
+    // ここからGoogleスプレッドシートへの書き込み処理を追加
+    if (config.googleSheets && config.googleSheets.enabled) {
+      try {
+        // 個別の順位データを書き込み
+        console.log('Googleスプレッドシートにデータを書き込みます...');
+        await writeToGoogleSheets(
+          rankData,
+          config.googleSheets.spreadsheetId,
+          config.date,
+          "GMO順位チェッカー"
+        );
+        // 割合データを書き込み
+        await writePercentageToGoogleSheets(
+          result,
+          config.googleSheets.percentSpreadsheetId,
+          config.date,
+          "割合傾向"
+        );
+        console.log('Googleスプレッドシートへの書き込みが完了しました');
+      } catch (sheetsError) {
+        console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', sheetsError);
+        // スプレッドシートのエラーがあっても処理を続行
+      }
+    }
 
     // 分析結果をSlackに通知
     if (config.slackWebhook) {
@@ -83,7 +93,7 @@ async function main() {
     }
 
     console.log('処理が完了しました');
-    return { success: true, result };
+    return {success: true, result};
   } catch (error) {
     console.error('エラーが発生しました:', error.message);
 
@@ -100,7 +110,7 @@ async function main() {
       }
     }
 
-    return { success: false, error: error.message };
+    return {success: false, error: error.message};
   } finally {
     // ブラウザを閉じる
     if (browserInstance) {

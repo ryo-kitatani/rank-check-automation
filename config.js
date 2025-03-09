@@ -11,6 +11,7 @@ const config = {
   googleSheets: {
     enabled: process.env.ENABLE_GOOGLE_SHEETS === 'true',
     spreadsheetId: process.env.SPREADSHEET_ID,
+    percentSpreadsheetId: process.env.PERCENT_SPREADSHEET_ID,
     // サービスアカウントのキーファイルパス
     keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
   }
