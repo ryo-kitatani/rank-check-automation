@@ -28,8 +28,7 @@ function analyzeRankData(rankData) {
 
   // 各キーワードの順位を分類
   rankData.forEach(item => {
-    const ranking = item.gRanking === "-" ? 100 : parseInt(item.gRanking);
-
+    const ranking = item.gRanking === "圏外" ? 100 : parseInt(item.gRanking);
     // 順位帯の分類
     if (ranking >= 1 && ranking <= 3) {
       rankCounts['1-3']++;

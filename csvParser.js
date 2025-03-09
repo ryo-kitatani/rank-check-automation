@@ -63,9 +63,10 @@ function parseRankingCsv(filePath) {
 
       // データ変換
       const rankData = records.map(record => {
+        const gRanking = record[gRankingColumn] === "圏外"? 100 : parseInt(record[gRankingColumn], 10);
         const item = {
           keyword: record[keywordColumn] || '',
-          gRanking: parseInt(record[gRankingColumn], 10)
+          gRanking: gRanking,
         };
 
         // 前日比データがある場合は追加
