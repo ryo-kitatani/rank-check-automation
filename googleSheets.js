@@ -111,40 +111,6 @@ async function prepareNewDateColumn(sheets, sheetInfo, spreadsheetId, sheetName,
 }
 
 /**
- * ランキングデータから割合を計算する関数
- * @param {Array} rankData - ランキングデータの配列
- * @returns {Object} 各順位帯の割合データ
- */
-function calculateRankPercentages(rankData) {
-  const totalKeywords = rankData.length;
-  let rank1to3 = 0;
-  let rank4to10 = 0;
-  let rank11to50 = 0;
-  let rankBelow = 0;
-
-  for (const item of rankData) {
-    const ranking = parseInt(item.gRanking);
-    if (ranking >= 1 && ranking <= 3) {
-      rank1to3++;
-    } else if (ranking >= 4 && ranking <= 10) {
-      rank4to10++;
-    } else if (ranking >= 11 && ranking <= 50) {
-      rank11to50++;
-    } else {
-      rankBelow++;
-    }
-  }
-
-  // パーセンテージ計算
-  return {
-    percent1to3: totalKeywords > 0 ? (rank1to3 / totalKeywords * 100).toFixed(1) : 0,
-    percent4to10: totalKeywords > 0 ? (rank4to10 / totalKeywords * 100).toFixed(1) : 0,
-    percent11to50: totalKeywords > 0 ? (rank11to50 / totalKeywords * 100).toFixed(1) : 0,
-    percentBelow: totalKeywords > 0 ? (rankBelow / totalKeywords * 100).toFixed(1) : 0
-  };
-}
-
-/**
  * Googleスプレッドシートにランキングデータを書き込む
  * @param {Array} rankData - ランキングデータの配列
  * @param {string} spreadsheetId - スプレッドシートID
@@ -187,7 +153,7 @@ async function writeToGoogleSheets(rankData, spreadsheetId, date, sheetName) {
     }
 
     // 新しい日付列を準備
-    const success = prepareNewDateColumn(sheets, sheetInfo, spreadsheetId, sheetName, date);
+    const success = await prepareNewDateColumn(sheets, sheetInfo, spreadsheetId, sheetName, date);
     if (!success) return false;
 
     // キーワードとその行番号をマッピング
@@ -308,7 +274,7 @@ async function writePercentageToGoogleSheets(result, spreadsheetId, date, sheetN
     }
 
     // 新しい日付列を準備
-    const success = prepareNewDateColumn(sheets, sheetInfo, spreadsheetId, sheetName, date);
+    const success = await prepareNewDateColumn(sheets, sheetInfo, spreadsheetId, sheetName, date);
     if (!success) return false;
 
     // 解析結果から割合データを取得（小数点第一位までを文字列に変換）
