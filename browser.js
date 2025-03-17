@@ -42,7 +42,10 @@ async function setupDownloadDir(page, downloadPath) {
 // ログイン処理
 async function login(page, email, password) {
   console.log('ログインページにアクセス中...');
-  await page.goto('https://app.rank-checker.com/login', { waitUntil: 'networkidle2' });
+  await page.goto('https://app.rank-checker.com/login', {
+    waitUntil: 'networkidle2',
+    timeout: 10000
+  });
 
   // Cloudflareのチャレンジがあれば待機
   await delay(5000);
@@ -55,6 +58,36 @@ async function login(page, email, password) {
   // スクリーンショットを撮って状態を確認（デバッグ用）
   await page.screenshot({ path: path.join(screenshotDir, 'login-page.png') });
 
+  // ログインフォームが表示されるまで待機
+  try {
+    // 様々なセレクタを待つ
+    await Promise.race([
+      page.waitForSelector('#email', { timeout: 10000 }),
+      page.waitForSelector('input[type="email"]', { timeout: 10000 }),
+      page.waitForSelector('input[type="text"]', { timeout: 10000 })
+    ]);
+    console.log('ログインフォームの要素が見つかりました');
+  } catch (e) {
+    console.log('ログインフォームの要素が見つかりませんでした。ページ内容を確認します');
+
+    // 実際に画面に何が表示されているか確認
+    const visibleText = await page.evaluate(() => {
+      return document.body.innerText;
+    });
+    console.log('ページに表示されているテキスト:', visibleText.substring(0, 500) + '...');
+
+    // 何か防御メカニズムが表示されているか
+    const hasCaptcha = await page.evaluate(() => {
+      return document.body.innerHTML.includes('captcha') ||
+        document.body.innerHTML.includes('Cloudflare') ||
+        document.body.innerHTML.includes('challenge');
+    });
+
+    if (hasCaptcha) {
+      console.log('CAPTCHA or Cloudflare challenge detected!');
+    }
+  }
+  
   // ログインフォームに入力
   console.log('ログイン情報を入力中...');
   await page.type('#email', email);

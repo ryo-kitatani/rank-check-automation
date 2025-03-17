@@ -78,12 +78,13 @@ jobs:
           PERCENT_SPREADSHEET_ID: ${{ secrets.percent_spreadsheet_id }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.google_application_credentials }}
           ENABLE_GOOGLE_SHEETS: true
-      - name: Slack通知
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-          text: 'ランクチェック完了 :rocket:'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always() # 成功しても失敗しても通知ank-check
+
+#      - name: Slack通知
+#        uses: 8398a7/action-slack@v3
+#        with:
+#          status: ${{ job.status }}
+#          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+#          text: 'ランクチェック完了 :rocket:'
+#        env:
+#          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#        if: always() # 成功しても失敗しても通知ank-check
