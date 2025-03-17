@@ -1,0 +1,101 @@
+name: 日時順位確認
+on:
+  schedule:
+    # JST 10:05
+    - cron: '5 1 * * *'
+  workflow_dispatch:
+
+
+jobs:
+  rank-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v3
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: 依存関係のインストール
+        run: npm install
+
+      - name: Puppeteer 依存ライブラリのインストール
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgbm-dev \
+            libasound2 \
+            libatk1.0-0 \
+            libc6 \
+            libcairo2 \
+            libcups2 \
+            libdbus-1-3 \
+            libexpat1 \
+            libfontconfig1 \
+            libgcc1 \
+            libgconf-2-4 \
+            libgdk-pixbuf2.0-0 \
+            libglib2.0-0 \
+            libgtk-3-0 \
+            libnspr4 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            libstdc++6 \
+            libx11-6 \
+            libx11-xcb1 \
+            libxcb1 \
+            libxcomposite1 \
+            libxcursor1 \
+            libxdamage1 \
+            libxext6 \
+            libxfixes3 \
+            libxi6 \
+            libxrandr2 \
+            libxrender1 \
+            libxss1 \
+            libxtst6 \
+            fonts-liberation \
+            xdg-utils \
+            lsb-release
+
+      - name: 必要なディレクトリの作成
+        run: |
+          mkdir -p result
+          mkdir -p screenshots
+
+      - name: 環境変数ファイルの作成
+        run: |
+          touch .env
+          echo "KEYWORD_1=${{ secrets.KEYWORD_1 }}" >> .env
+          echo "KEYWORD_2=${{ secrets.KEYWORD_2 }}" >> .env
+          echo "KEYWORD_3=${{ secrets.KEYWORD_3 }}" >> .env
+          echo "URL_1=${{ secrets.URL_1 }}" >> .env
+          echo "URL_2=${{ secrets.URL_2 }}" >> .env
+          echo "URL_3=${{ secrets.URL_3 }}" >> .env
+          # 必要に応じて他の環境変数も追加
+
+      - name: ランクチェック実行
+        run: node index.js
+
+      - name: 結果のアップロード
+        uses: actions/upload-artifact@v3
+        with:
+          name: rank-check-results
+          path: |
+            result/*.csv
+            result/*.json
+            screenshots/*.png
+
+      - name: Slack通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: 'ランクチェック完了 :rocket:'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always() # 成功しても失敗しても通知ank-check
