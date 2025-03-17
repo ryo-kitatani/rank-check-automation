@@ -14,7 +14,8 @@ const config = {
     percentSpreadsheetId: process.env.PERCENT_SPREADSHEET_ID,
     // サービスアカウントのキーファイルパス
     keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
-  }
+  },
+  headless: true
 };
 
 // 設定の検証
