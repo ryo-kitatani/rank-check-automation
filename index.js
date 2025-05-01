@@ -34,6 +34,8 @@ async function main() {
     // ログイン
     await browser.login(page, config.email, config.password);
 
+    await delay(5000); // ログイン後の待機
+
     // ランキングページに移動
     await browser.navigateToGroup(page, 'DM_SとAランクキーワード');
 
