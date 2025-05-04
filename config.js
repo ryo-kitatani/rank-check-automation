@@ -4,14 +4,13 @@ require('dotenv').config();
 const config = {
   email: process.env.RANK_CHECKER_EMAIL,
   password: process.env.RANK_CHECKER_PASSWORD,
-  slackWebhook: process.env.SLACK_WEBHOOK_URL,
+  slackWebhook: process.env.RANK_CHECKER_SLACK_WEBHOOK_URL,
   // 今日の日付（YYYY-MM-DD形式）
   date: new Date().toISOString().split('T')[0],
   // Google Sheets APIの設定を追加
   googleSheets: {
-    enabled: process.env.ENABLE_GOOGLE_SHEETS === 'true',
-    spreadsheetId: process.env.SPREADSHEET_ID,
-    percentSpreadsheetId: process.env.PERCENT_SPREADSHEET_ID,
+    spreadsheetId: 'suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
+    percentSpreadsheetId: '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
     // サービスアカウントのキーファイルパス
     keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
   },

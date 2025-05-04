@@ -61,7 +61,7 @@ async function main() {
     const result = analyzeRankData(rankData);
 
     // ここからGoogleスプレッドシートへの書き込み処理を追加
-    if (config.googleSheets && config.googleSheets.enabled) {
+    if (config.googleSheets) {
       try {
         // 個別の順位データを書き込み
         console.log('Googleスプレッドシートにデータを書き込みます...');
