@@ -80,7 +80,7 @@ async function main() {
         );
         console.log('Googleスプレッドシートへの書き込みが完了しました');
       } catch (sheetsError) {
-        console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', sheetsError);
+        console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました');
         // スプレッドシートのエラーがあっても処理を続行
       }
     }

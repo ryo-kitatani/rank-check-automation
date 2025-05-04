@@ -12,7 +12,7 @@ const config = {
     spreadsheetId: '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
     percentSpreadsheetId: '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
     // サービスアカウントのキーファイルパス
-    keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+    keyFilePath: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   },
   headless: true
 };

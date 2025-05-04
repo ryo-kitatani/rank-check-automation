@@ -220,7 +220,7 @@ async function writeToGoogleSheets(rankData, spreadsheetId, date, sheetName) {
     console.log('Googleスプレッドシートにデータを書き込みました');
     return true;
   } catch (error) {
-    console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:', error);
+    console.error('Googleスプレッドシートへの書き込み中にエラーが発生しました:');
     throw error;
   }
 }
