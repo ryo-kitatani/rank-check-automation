@@ -25,7 +25,7 @@ async function main() {
 
   try {
     // ブラウザの初期化
-    const {browser: instance, page} = await browser.initBrowser(config.headless);
+    const {browser: instance, page} = await browser.initBrowser();
     browserInstance = instance;
 
     // ダウンロードディレクトリの設定

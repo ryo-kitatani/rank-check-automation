@@ -3,22 +3,48 @@ const fs = require('fs');
 const path = require('path');
 const { delay } = require('./utils');
 
-// スクリーンショット保存ディレクトリの定義
-const screenshotDir = path.join(__dirname, 'screenshots');
-
 // ブラウザを初期化し、セッションを開始
-async function initBrowser(headless) {
+async function initBrowser() {
   console.log('ブラウザを起動中...');
   const browser = await puppeteer.launch({
-    headless: headless,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    headless: 'new', // 'new'は新しいヘッドレスモード（検出されにくい）
     defaultViewport: null,
-    args: ['--window-size=1200,800', '--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--window-size=1920,1080', // 一般的な画面サイズに変更
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--hide-scrollbars',
+      '--disable-notifications',
+      '--disable-extensions',
+      '--disable-infobars',
+      '--ignore-certificate-errors'
+    ]
   });
 
   const page = await browser.newPage();
 
   // ブラウザのふりをする
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36');
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+  // 追加ヘッダーを設定
+  await page.setExtraHTTPHeaders({
+    'Accept-Language': 'ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1'
+  });
+
+  // Cookieとキャッシュを有効化（一般的なブラウザ動作）
+  await page.setJavaScriptEnabled(true);
+  await page.setCacheEnabled(true);
 
   return { browser, page };
 }
@@ -49,15 +75,6 @@ async function login(page, email, password) {
 
   // Cloudflareのチャレンジがあれば待機
   await delay(5000);
-
-  const screenshotDir = path.join(__dirname, 'screenshots');
-  if (!fs.existsSync(screenshotDir)) {
-    fs.mkdirSync(screenshotDir);
-  }
-
-  // スクリーンショットを撮って状態を確認（デバッグ用）
-  await page.screenshot({ path: path.join(screenshotDir, 'login-page.png') });
-
   // ログインフォームが表示されるまで待機
   try {
     // 様々なセレクタを待つ
@@ -87,7 +104,7 @@ async function login(page, email, password) {
       console.log('CAPTCHA or Cloudflare challenge detected!');
     }
   }
-  
+
   // ログインフォームに入力
   console.log('ログイン情報を入力中...');
   await page.type('#email', email);
@@ -161,23 +178,11 @@ async function navigateToGroup(page, groupName) {
     // クリック後の待機
     await delay(2000);
 
-    // デバッグ用のスクリーンショット
-    await page.screenshot({
-      path: path.join(screenshotDir, 'group-selected.png'),
-      fullPage: true
-    });
-
     console.log(`グループ「${groupName}」を正常に選択しました`);
     return true;
 
   } catch (error) {
     console.error(`グループ選択中にエラーが発生: ${error.message}`);
-
-    // エラー時のスクリーンショット
-    await page.screenshot({
-      path: path.join(screenshotDir, 'group-selection-error.png'),
-      fullPage: true
-    });
 
     return false;
   }
@@ -200,7 +205,7 @@ async function downloadCsv(page) {
     const downloadButtonClicked = await page.evaluate(() => {
       // aria-label="データ出力"を持つ要素を探す
       const downloadButton = document.querySelector('span[aria-label="データ出力"]');
-      if  (downloadButton) {
+      if (downloadButton) {
         downloadButton.click();
         return true;
       }
@@ -209,9 +214,6 @@ async function downloadCsv(page) {
 
     if (!downloadButtonClicked) {
       console.log('データ出力/ダウンロードボタンが見つかりませんでした');
-
-      // ページの状態を記録
-      await page.screenshot({ path: './screenshots/download-button-not-found.png' });
       return false;
     }
 
@@ -258,10 +260,6 @@ async function downloadCsv(page) {
 
     if (!popupButtonClicked) {
       console.log('ポップアップ内の「データ出力」ボタンが見つかりませんでした');
-
-      // ページの状態を記録
-      await page.screenshot({ path: './screenshots/popup-button-not-found.png' });
-
       return false;
     }
 
@@ -274,10 +272,6 @@ async function downloadCsv(page) {
 
   } catch (error) {
     console.error('CSVダウンロード中にエラーが発生しました:', error.message);
-
-    // エラー時のスクリーンショット
-    await page.screenshot({ path: './screenshots/csv-download-error.png' });
-
     return false;
   }
 }

@@ -9,7 +9,7 @@ const config = {
   date: new Date().toISOString().split('T')[0],
   // Google Sheets APIの設定を追加
   googleSheets: {
-    spreadsheetId: 'suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
+    spreadsheetId: '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
     percentSpreadsheetId: '1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s',
     // サービスアカウントのキーファイルパス
     keyFilePath: process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE,

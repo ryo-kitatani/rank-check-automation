@@ -1,9 +1,7 @@
 .env
 .idea
-
 page-content.html
 node_modules
 downloads
-screenshots
 .DS_Store
 service-account-key.json
