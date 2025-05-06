@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const { delay } = require('./utils');
+const { env } = require('process');
 
 // ブラウザを初期化し、セッションを開始
 async function initBrowser() {
@@ -22,10 +23,16 @@ async function initBrowser() {
       '--disable-extensions',
       '--disable-infobars',
       '--ignore-certificate-errors'
-    ]
+    ],
+    env: {
+      TZ: 'Asia/Tokyo', // タイムゾーンを日本に設定
+      ...process.env
+    }
   });
 
   const page = await browser.newPage();
+  // ページ単位でもタイムゾーンを設定（より確実）
+  await page.emulateTimezone('Asia/Tokyo');
 
   // ブラウザのふりをする
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');

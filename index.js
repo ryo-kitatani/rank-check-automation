@@ -1,10 +1,10 @@
 const path = require('path');
-const {config, validateConfig, logConfig} = require('./config');
+const { config, validateConfig, logConfig } = require('./config');
 const browser = require('./browser');
 const csvParser = require('./csvParser');
-const {analyzeRankData, delay} = require('./utils');
-const {writeToGoogleSheets, writePercentageToGoogleSheets} = require("./googleSheets");
-const {sendToSlack, createAnalysisMessage} = require('./slack');
+const { analyzeRankData, delay } = require('./utils');
+const { writeToGoogleSheets, writePercentageToGoogleSheets } = require("./googleSheets");
+const { sendToSlack, createAnalysisMessage } = require('./slack');
 
 // ダウンロードディレクトリのパス
 const downloadPath = path.join(__dirname, 'downloads');
@@ -25,8 +25,12 @@ async function main() {
 
   try {
     // ブラウザの初期化
-    const {browser: instance, page} = await browser.initBrowser();
+    const { browser: instance, page } = await browser.initBrowser();
     browserInstance = instance;
+
+    // この行を追加（デバッグ用）
+    const dateTime = await page.evaluate(() => new Date().toString());
+    console.log('ブラウザ内の時刻:', dateTime);
 
     // ダウンロードディレクトリの設定
     await browser.setupDownloadDir(page, downloadPath);
@@ -95,7 +99,7 @@ async function main() {
     }
 
     console.log('処理が完了しました');
-    return {success: true, result};
+    return { success: true, result };
   } catch (error) {
     console.error('エラーが発生しました:', error.message);
 
@@ -112,7 +116,7 @@ async function main() {
       }
     }
 
-    return {success: false, error: error.message};
+    return { success: false, error: error.message };
   } finally {
     // ブラウザを閉じる
     if (browserInstance) {
