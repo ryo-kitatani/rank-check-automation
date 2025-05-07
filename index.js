@@ -1,3 +1,7 @@
+process.env.TZ = 'Asia/Tokyo';
+console.log('Node.js環境のタイムゾーン設定:', process.env.TZ);
+console.log('現在のシステム時刻:', new Date().toString());
+
 const path = require('path');
 const { config, validateConfig, logConfig } = require('./config');
 const browser = require('./browser');
