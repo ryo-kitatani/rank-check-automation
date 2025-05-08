@@ -22,7 +22,8 @@ async function initBrowser() {
       '--disable-notifications',
       '--disable-extensions',
       '--disable-infobars',
-      '--ignore-certificate-errors'
+      '--ignore-certificate-errors',
+      '--timezone=Asia/Tokyo' // Chromiumブラウザに直接タイムゾーンを指定
     ],
     env: {
       TZ: 'Asia/Tokyo', // タイムゾーンを日本に設定
