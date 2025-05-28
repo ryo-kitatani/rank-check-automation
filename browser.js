@@ -133,6 +133,8 @@ async function login(page, email, password) {
 async function navigateToGroup(page, groupName) {
   console.log(`グループ「${groupName}」を選択中...`);
 
+  await delay(10000);
+
   try {
     // "グループ" タブをクリック
     const groupTabClicked = await page.evaluate(() => {

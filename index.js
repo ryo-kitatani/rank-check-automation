@@ -45,7 +45,7 @@ async function main() {
     await delay(5000); // ログイン後の待機
 
     // ランキングページに移動
-    await browser.navigateToGroup(page, 'DM_SとAランクキーワード');
+    await browser.navigateToGroup(page, 'DM_SとAランクキーワード_PC');
 
     // CSVダウンロードボタンをクリック
     await browser.downloadCsv(page);
