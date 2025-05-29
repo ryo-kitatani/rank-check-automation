@@ -55,12 +55,12 @@ async function sendToSlack({
  * @param {string} date 日付
  * @returns {string} Slack通知用メッセージ
  */
-function createAnalysisMessage(analysis, date) {
+function createAnalysisMessage(analysis, date, groupName) {
   const { rankPercent, rankCounts, changeStats, total } = analysis;
 
   let message = "";
   message += `GMO順位チェッカー順位計測結果（${date})\n`;
-  message += `対象グループ：DM_SとAランクキーワード\n\n`;
+  message += `対象グループ：${groupName}\n\n`;
   message += `■ 順位分布 [<https://docs.google.com/spreadsheets/d/1suoQqpEBwvVYYVTM5LKjAUP6m0XQE0iO22Apnd7Mu4s/edit?gid=1149902036#gid=1149902036|確認>]\n`;
   message += `1~3位  ：${rankPercent['1-3'].toFixed(2)}% (${rankCounts['1-3']}件)\n`;
   message += `4~10位 ：${rankPercent['4-10'].toFixed(2)}% (${rankCounts['4-10']}件)\n`;

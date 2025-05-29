@@ -44,8 +44,10 @@ async function main() {
 
     await delay(5000); // ログイン後の待機
 
+    const groupName = 'DM_SとAランクキーワード_PC';
+
     // ランキングページに移動
-    await browser.navigateToGroup(page, 'DM_SとAランクキーワード_PC');
+    await browser.navigateToGroup(page, groupName);
 
     // CSVダウンロードボタンをクリック
     await browser.downloadCsv(page);
@@ -96,7 +98,7 @@ async function main() {
     // 分析結果をSlackに通知
     if (config.slackWebhook) {
       await sendToSlack({
-        message: createAnalysisMessage(result, config.date),
+        message: createAnalysisMessage(result, config.date, groupName),
         webhookUrl: config.slackWebhook,
         channel: "#coeteco-dm-product"
       });
